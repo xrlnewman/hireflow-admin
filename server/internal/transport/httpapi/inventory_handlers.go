@@ -69,6 +69,9 @@ func (s *Server) stockPurchases(c *gin.Context) {
 }
 
 func (s *Server) stockReceive(c *gin.Context) {
+	if !s.requireIdempotencyKey(c) {
+		return
+	}
 	data, err := s.stock.Receive(c.Request.Context(), c.Param("id"), c.GetHeader("Idempotency-Key"))
 	if err != nil {
 		s.stockMutationError(c, err, "确认入库失败")
@@ -88,12 +91,23 @@ func (s *Server) stockSales(c *gin.Context) {
 }
 
 func (s *Server) stockShip(c *gin.Context) {
+	if !s.requireIdempotencyKey(c) {
+		return
+	}
 	data, err := s.stock.Ship(c.Request.Context(), c.Param("id"), c.GetHeader("Idempotency-Key"))
 	if err != nil {
 		s.stockMutationError(c, err, "确认出库失败")
 		return
 	}
 	s.envelope(c, http.StatusOK, "出库已确认", data)
+}
+
+func (s *Server) requireIdempotencyKey(c *gin.Context) bool {
+	if c.GetHeader("Idempotency-Key") != "" {
+		return true
+	}
+	s.envelope(c, http.StatusBadRequest, "写请求必须携带 Idempotency-Key", nil)
+	return false
 }
 
 func (s *Server) stockMovements(c *gin.Context) {
@@ -118,5 +132,3 @@ func (s *Server) stockMutationError(c *gin.Context, err error, fallback string) 
 		s.envelope(c, http.StatusBadRequest, fallback, nil)
 	}
 }
-
-
