@@ -4,9 +4,12 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/xrlnewman/hireflow-admin/server/internal/app/inventory"
+	"github.com/xrlnewman/hireflow-admin/server/internal/platform/store"
 )
 
 func pageParams(c *gin.Context) (int, int) {
@@ -78,6 +81,7 @@ func (s *Server) stockReceive(c *gin.Context) {
 		return
 	}
 	s.envelope(c, http.StatusOK, "入库已确认", data)
+	s.store.AddAudit(store.AuditLog{ID: uuid.NewString(), ActorID: claimsOf(c).UserID, Action: "recruiting_screen", Resource: c.Param("id"), Result: "success", CreatedAt: time.Now().UTC()})
 }
 
 func (s *Server) stockSales(c *gin.Context) {
@@ -100,6 +104,7 @@ func (s *Server) stockShip(c *gin.Context) {
 		return
 	}
 	s.envelope(c, http.StatusOK, "出库已确认", data)
+	s.store.AddAudit(store.AuditLog{ID: uuid.NewString(), ActorID: claimsOf(c).UserID, Action: "interview_complete", Resource: c.Param("id"), Result: "success", CreatedAt: time.Now().UTC()})
 }
 
 func (s *Server) requireIdempotencyKey(c *gin.Context) bool {
