@@ -1,6 +1,6 @@
 # HireFlow Admin
 
-HireFlow 是免费开源的招聘协同运营后台与 Go Gin API，覆盖职位发布、候选人入库、筛选、面试、录用和入职跟进。每次写操作都会记录状态事件与审计日志，重复提交使用 `Idempotency-Key` 安全重试。
+HireFlow 是招聘协同运营后台与 Go Gin API，覆盖职位发布、候选人入库、筛选、面试、录用和入职跟进。每次写操作都会记录状态事件与审计日志，重复提交使用 `Idempotency-Key` 安全重试。
 
 ## 关联仓库
 
@@ -18,7 +18,7 @@ cd web && npm install && npm test && npm run build
 
 ## API 摘要
 
-所有接口返回 `{ code, message, data, traceId }`，写接口支持 `Idempotency-Key`。闭环：候选人录入 → 简历筛选 → 面试安排 → 面试反馈 → 发放 Offer → 入职确认。
+所有接口返回 `{ code, message, data, traceId }`，写接口支持 `Idempotency-Key`。候选人状态依次为：录入 → 简历筛选 → 面试安排 → 面试反馈 → 发放 Offer → 入职确认。
 
 | Method | URL | 用途 |
 | --- | --- | --- |
